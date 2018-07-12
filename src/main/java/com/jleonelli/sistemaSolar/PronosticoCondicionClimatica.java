@@ -39,4 +39,10 @@ public class PronosticoCondicionClimatica {
   }
   
   
+  public String toString() {
+	  return "Para el pronostico de " + periodo + " años, habran: " + periodosDeSequia + " periodos de sequia, " + periodosDeLluvia
+			  + " periodos de lluvia, con el dia numero " + diaDePicoMaximoDeLluvia + " el dia de pico "
+			  + "maximo de lluvia y habra " + periodosDeCondicionesOptimas + " periodos de condiciones optimas de temp y presion.";
+  }
+  
 }

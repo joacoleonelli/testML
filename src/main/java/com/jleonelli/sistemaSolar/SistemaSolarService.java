@@ -64,7 +64,8 @@ public class SistemaSolarService {
 	  Float distanciaPlaneta12 = calcularDistanciaPlanetas(planeta1, planeta2);
 	  Float distanciaPlaneta23 = calcularDistanciaPlanetas(planeta2, planeta3);
 	  Float distanciaPlaneta13 = calcularDistanciaPlanetas(planeta1, planeta3);
-		return distanciaPlaneta12 + distanciaPlaneta23 + distanciaPlaneta13;
+	
+	  return distanciaPlaneta12 + distanciaPlaneta23 + distanciaPlaneta13;
 	}
 	
 	/**
@@ -82,7 +83,7 @@ public class SistemaSolarService {
 	  Integer planeta2X = planeta2.get("x");
 	  Integer planeta2Y = planeta2.get("y");
 		
-		return (float) Math.sqrt(Math.pow(planeta2X - planeta1X, 2) + Math.pow(planeta2Y - planeta1Y, 2));
+	  return (float) Math.sqrt(Math.pow(planeta2X - planeta1X, 2) + Math.pow(planeta2Y - planeta1Y, 2));
 	}
 	
 	/**
@@ -127,6 +128,8 @@ public class SistemaSolarService {
 	
 	/** Metodo principal para calculo de condiciones climaticas para un periodo de tiempo dado **/
 	
+	// ver que pasa con el planeta que va antihorario
+	
 	public void calcularCondicionesClimaticas(Integer años, Planeta planeta1, Planeta planeta2, Planeta planeta3) {
 	  PronosticoCondicionClimatica response = new PronosticoCondicionClimatica();
 	  response.setPeriodo(años);
@@ -137,9 +140,17 @@ public class SistemaSolarService {
 	  Integer diaDePicoMaximoDeLluvia = null;
 	  Integer periodosDeCondicionesOptimas = 0;
 	  
+	  boolean planetasAlineados = false;
+	  boolean solDentroTriangulo = false;
+	  Float perimetroMaximo = (float) 0;
+	  
 	  Map<String, Integer> posicionPlaneta1;
 	  Map<String, Integer> posicionPlaneta2;
 	  Map<String, Integer> posicionPlaneta3;
+	  
+	  Map<String, Integer> sol = new HashMap<String, Integer>();
+	  sol.put("x", 0);
+	  sol.put("y", 0);
 	  
 	  for (int d = 0; d <= dias; d++) {
 	    posicionPlaneta1 = calcularPosicionPlaneta(planeta1, d);
@@ -162,7 +173,36 @@ public class SistemaSolarService {
 	     *       Si perimetro es mas grande que el ultimo calculado
 	     *           diaDePicoMaximoDeLluvia = d
 	     */
+	    
+	    planetasAlineados = calcularAlineacion(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3);
+	    
+	    if (planetasAlineados) {
+	    	boolean planeta12AlineadoSol = calcularAlineacion(posicionPlaneta1, posicionPlaneta2, sol);
+	    	boolean planeta23AlineadoSol = calcularAlineacion(posicionPlaneta2, posicionPlaneta3, sol);
+	    	
+	    	if (planeta12AlineadoSol && planeta23AlineadoSol) {
+	    		periodosDeSequia++;
+	    	} else {
+	    		periodosDeCondicionesOptimas++;
+	    	}
+	    	
+	    } else {
+	    	solDentroTriangulo = calcularSolDentroTriangulo(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3, sol);
+	    	if (solDentroTriangulo) {
+	    		periodosDeLluvia++;
+	    		Float perimetroActual = calcularPerimetroTriangulo(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3);
+	    		if (perimetroActual > perimetroMaximo) {
+	    			perimetroMaximo = perimetroActual;
+	    			diaDePicoMaximoDeLluvia = d;
+	    		}
+	    	}
+	    }
 	  }
+	  
+	  response.setPeriodosDeSequia(periodosDeSequia);
+	  response.setPeriodosDeLluvia(periodosDeLluvia);
+	  response.setDiaDePicoMaximoDeLluvia(diaDePicoMaximoDeLluvia);
+	  response.setPeriodosDeCondicionesOptimas(periodosDeCondicionesOptimas);
 	}
 	
 }
