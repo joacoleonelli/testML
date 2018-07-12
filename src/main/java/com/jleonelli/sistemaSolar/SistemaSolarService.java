@@ -17,10 +17,10 @@ public class SistemaSolarService {
 	 * 			ángulo de posición inicial.
 	 * @return Mapa con coordenadas x, y que designan la posición del planeta.
 	 */
-	public Map<String, Integer> calcularPosicionPlaneta(Integer distanciaSol, Integer velocidadAngular, Integer tiempo, Integer posicionInicial){
+	public Map<String, Integer> calcularPosicionPlaneta(Planeta planeta, Integer tiempo){
 		
-		Integer x = (int) (distanciaSol * Math.cos(velocidadAngular * tiempo + posicionInicial));
-		Integer y = (int) (distanciaSol * Math.sin(velocidadAngular * tiempo + posicionInicial));
+		Integer x = (int) (planeta.getDistanciaSol() * Math.cos(Math.toRadians(planeta.getVelocidadAngular() * tiempo + planeta.getPosicionInicial())));
+		Integer y = (int) (planeta.getDistanciaSol() * Math.sin(Math.toRadians(planeta.getVelocidadAngular() * tiempo + planeta.getPosicionInicial())));
 		
 		Map<String, Integer> posicionPlaneta = new HashMap<String, Integer>();
 		posicionPlaneta.put("x", x);
@@ -45,11 +45,10 @@ public class SistemaSolarService {
 		Integer elemento1Y = elemento1.get("y");
 		
 		Integer elemento2X = elemento2.get("x");
-		Integer elemento2Y = elemento3.get("y");
+		Integer elemento2Y = elemento2.get("y");
 		
 		Integer elemento3X = elemento3.get("x");
 		Integer elemento3Y = elemento3.get("y");
-		
 		
 		return (elemento2Y - elemento1Y) * (elemento3X - elemento2X) == (elemento3Y - elemento2Y) * (elemento2X - elemento1X);
 	}
@@ -62,9 +61,9 @@ public class SistemaSolarService {
 	 * @return Perimetro del triángulo.
 	 */
 	public Float calcularPerimetroTriangulo(Map<String, Integer> planeta1, Map<String, Integer> planeta2, Map<String, Integer> planeta3) {
-		Float distanciaPlaneta12 = calcularDistanciaPlanetas(planeta1, planeta2);
-		Float distanciaPlaneta23 = calcularDistanciaPlanetas(planeta2, planeta3);
-		Float distanciaPlaneta13 = calcularDistanciaPlanetas(planeta1, planeta3);
+	  Float distanciaPlaneta12 = calcularDistanciaPlanetas(planeta1, planeta2);
+	  Float distanciaPlaneta23 = calcularDistanciaPlanetas(planeta2, planeta3);
+	  Float distanciaPlaneta13 = calcularDistanciaPlanetas(planeta1, planeta3);
 		return distanciaPlaneta12 + distanciaPlaneta23 + distanciaPlaneta13;
 	}
 	
@@ -77,14 +76,13 @@ public class SistemaSolarService {
 	 * @return Distancia/Longitud de lado entre planeta1 y planeta2.
 	 */
 	public Float calcularDistanciaPlanetas(Map<String, Integer> planeta1, Map<String, Integer> planeta2) {
-		Integer planeta1X = planeta1.get("x");
-		Integer planeta1Y = planeta1.get("y");
+	  Integer planeta1X = planeta1.get("x");
+	  Integer planeta1Y = planeta1.get("y");
 		
-		Integer planeta2X = planeta2.get("x");
-		Integer planeta2Y = planeta2.get("y");
+	  Integer planeta2X = planeta2.get("x");
+	  Integer planeta2Y = planeta2.get("y");
 		
-		Float distanciaPlanetas = (float) Math.sqrt(Math.pow(planeta2X - planeta1X, 2) + Math.pow(planeta2Y - planeta1Y, 2));
-		return distanciaPlanetas;
+		return (float) Math.sqrt(Math.pow(planeta2X - planeta1X, 2) + Math.pow(planeta2Y - planeta1Y, 2));
 	}
 	
 	/**
@@ -119,14 +117,52 @@ public class SistemaSolarService {
 		Integer elemento1Y = elemento1.get("y");
 		
 		Integer elemento2X = elemento2.get("x");
-		Integer elemento2Y = elemento3.get("y");
+		Integer elemento2Y = elemento2.get("y");
 		
 		Integer elemento3X = elemento3.get("x");
 		Integer elemento3Y = elemento3.get("y");
 		
-		Float area = (float) Math.abs((elemento1X * (elemento2Y - elemento3Y) + elemento2X * (elemento3Y - elemento1Y) + elemento3X * (elemento1Y - elemento2Y))/ 2);
-		
-		return area;
+		return (float) Math.abs((elemento1X * (elemento2Y - elemento3Y) + elemento2X * (elemento3Y - elemento1Y) + elemento3X * (elemento1Y - elemento2Y))/ 2);
 	}
-
+	
+	/** Metodo principal para calculo de condiciones climaticas para un periodo de tiempo dado **/
+	
+	public void calcularCondicionesClimaticas(Integer años, Planeta planeta1, Planeta planeta2, Planeta planeta3) {
+	  PronosticoCondicionClimatica response = new PronosticoCondicionClimatica();
+	  response.setPeriodo(años);
+	  
+	  int dias = años * 365;
+	  Integer periodosDeSequia = 0;
+	  Integer periodosDeLluvia = 0;
+	  Integer diaDePicoMaximoDeLluvia = null;
+	  Integer periodosDeCondicionesOptimas = 0;
+	  
+	  Map<String, Integer> posicionPlaneta1;
+	  Map<String, Integer> posicionPlaneta2;
+	  Map<String, Integer> posicionPlaneta3;
+	  
+	  for (int d = 0; d <= dias; d++) {
+	    posicionPlaneta1 = calcularPosicionPlaneta(planeta1, d);
+	    posicionPlaneta2 = calcularPosicionPlaneta(planeta2, d);
+	    posicionPlaneta3 = calcularPosicionPlaneta(planeta3, d);
+	    
+	    /*
+	     * Calcular alineacion de planetas
+	     * Si estan alineados
+	     *     Calcular alineacion con el sol
+	     *     Si estan alineados con sol
+	     *         periodosDeSequia++
+	     *     Sino
+	     *         periodosDeCondicionesOptimas++
+	     * Sino
+	     *   Calcular sol dentro del triangulo
+	     *   Si sol dentro del triangulo
+	     *       periodosDeLluvia++
+	     *       Calcular perimetro triangulo
+	     *       Si perimetro es mas grande que el ultimo calculado
+	     *           diaDePicoMaximoDeLluvia = d
+	     */
+	  }
+	}
+	
 }
