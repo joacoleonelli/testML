@@ -18,7 +18,7 @@ public class SistemaSolarServiceTest {
   
   @Test
   public void testCalcularPosicionPlaneta() {
-    Planeta planeta = new Planeta(500, 1, 90);
+    Planeta planeta = new Planeta(500, "antihorario", 1, 90);
     Map<String, Integer> posicionPlaneta = sistemaSolarService.calcularPosicionPlaneta(planeta, 0);
     
     assertEquals(posicionPlaneta.get("x").intValue(), 0);

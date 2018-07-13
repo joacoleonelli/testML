@@ -3,24 +3,35 @@ package com.jleonelli.sistemaSolar;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Servicio que contiene los metodos utilitarios para calculos y el metodo principal
+ * para calculo de condiciones climaticas.
+ * 
+ * @author jleonelli
+ *
+ */
 public class SistemaSolarService {
 	
 	/**
+	 * Calcula la posicion del planeta dado un dia.
 	 * 
-	 * @param distanciaSol
-	 * 			radio/distancia del planeta al origen/sol. 
-	 * @param velocidadAngular
-	 * 			cantidad de grados por dia.
+	 * @param planeta
+	 * 			planeta para el cual se calculara su posicion.
 	 * @param tiempo
-	 * 			año para el cual se calcula la posición.
-	 * @param posicionInicial
-	 * 			ángulo de posición inicial.
+	 * 			dia para el cual se calcula la posición.
 	 * @return Mapa con coordenadas x, y que designan la posición del planeta.
 	 */
 	public Map<String, Integer> calcularPosicionPlaneta(Planeta planeta, Integer tiempo){
+	  
+	  Integer velocidadAngular = 0;
+	  if (planeta.getSentidoDeGiro().equals("horario")) {
+	    velocidadAngular = -planeta.getVelocidadAngular();
+	  } else if (planeta.getSentidoDeGiro().equals("antihorario")) {
+	    velocidadAngular = planeta.getVelocidadAngular();
+	  }
 		
-		Integer x = (int) (planeta.getDistanciaSol() * Math.cos(Math.toRadians(planeta.getVelocidadAngular() * tiempo + planeta.getPosicionInicial())));
-		Integer y = (int) (planeta.getDistanciaSol() * Math.sin(Math.toRadians(planeta.getVelocidadAngular() * tiempo + planeta.getPosicionInicial())));
+		Integer x = (int) (planeta.getDistanciaSol() * Math.cos(Math.toRadians(velocidadAngular * tiempo + planeta.getPosicionInicial())));
+		Integer y = (int) (planeta.getDistanciaSol() * Math.sin(Math.toRadians(velocidadAngular * tiempo + planeta.getPosicionInicial())));
 		
 		Map<String, Integer> posicionPlaneta = new HashMap<String, Integer>();
 		posicionPlaneta.put("x", x);
@@ -30,7 +41,7 @@ public class SistemaSolarService {
 	}
 	
 	/**
-	 * 
+	 * Calcula si los elementos estan alineados siendo elementos 3 planetas o 2 planetas 1 el sol.
 	 * 
 	 * @param elemento1
 	 * 			posicion planeta1 o Sol
@@ -54,11 +65,15 @@ public class SistemaSolarService {
 	}
 	
 	/**
+	 * Calcula el perimetro del triangulo formado por la posicion de los planetas.
 	 * 
-	 * @param elemento1
-	 * @param elemento2
-	 * @param elemento3
-	 * @return Perimetro del triángulo.
+	 * @param planeta1
+   *      posicion planeta1 o Sol
+   * @param planeta2
+   *      posicion planeta2 o Sol
+   * @param planeta3
+   *      posicion planeta3 o Sol
+	 * @return Perimetro del triangulo
 	 */
 	public Float calcularPerimetroTriangulo(Map<String, Integer> planeta1, Map<String, Integer> planeta2, Map<String, Integer> planeta3) {
 	  Float distanciaPlaneta12 = calcularDistanciaPlanetas(planeta1, planeta2);
@@ -69,6 +84,7 @@ public class SistemaSolarService {
 	}
 	
 	/**
+	 * Calcula la distancia entre 2 planetas.
 	 * 
 	 * @param planeta1
 	 * 			posicion planeta1.
@@ -104,6 +120,7 @@ public class SistemaSolarService {
 	}
 	
 	/**
+	 * Calcula el angulo del triangulo formado por 3 planetas o 2 planetas y el sol.
 	 * 
 	 * @param elemento1
 	 * 			posicion planeta1 o Sol
@@ -126,10 +143,14 @@ public class SistemaSolarService {
 		return (float) Math.abs((elemento1X * (elemento2Y - elemento3Y) + elemento2X * (elemento3Y - elemento1Y) + elemento3X * (elemento1Y - elemento2Y))/ 2);
 	}
 	
-	/** Metodo principal para calculo de condiciones climaticas para un periodo de tiempo dado **/
-	
-	// ver que pasa con el planeta que va antihorario
-	
+	/**
+	 * Calcula las condiciones climaticas dada una cantidad de años y 3 planetas.
+	 * 
+	 * @param años
+	 * @param planeta1
+	 * @param planeta2
+	 * @param planeta3
+	 */
 	public void calcularCondicionesClimaticas(Integer años, Planeta planeta1, Planeta planeta2, Planeta planeta3) {
 	  PronosticoCondicionClimatica response = new PronosticoCondicionClimatica();
 	  response.setPeriodo(años);
@@ -156,24 +177,7 @@ public class SistemaSolarService {
 	    posicionPlaneta1 = calcularPosicionPlaneta(planeta1, d);
 	    posicionPlaneta2 = calcularPosicionPlaneta(planeta2, d);
 	    posicionPlaneta3 = calcularPosicionPlaneta(planeta3, d);
-	    
-	    /*
-	     * Calcular alineacion de planetas
-	     * Si estan alineados
-	     *     Calcular alineacion con el sol
-	     *     Si estan alineados con sol
-	     *         periodosDeSequia++
-	     *     Sino
-	     *         periodosDeCondicionesOptimas++
-	     * Sino
-	     *   Calcular sol dentro del triangulo
-	     *   Si sol dentro del triangulo
-	     *       periodosDeLluvia++
-	     *       Calcular perimetro triangulo
-	     *       Si perimetro es mas grande que el ultimo calculado
-	     *           diaDePicoMaximoDeLluvia = d
-	     */
-	    
+
 	    planetasAlineados = calcularAlineacion(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3);
 	    
 	    if (planetasAlineados) {
@@ -203,6 +207,8 @@ public class SistemaSolarService {
 	  response.setPeriodosDeLluvia(periodosDeLluvia);
 	  response.setDiaDePicoMaximoDeLluvia(diaDePicoMaximoDeLluvia);
 	  response.setPeriodosDeCondicionesOptimas(periodosDeCondicionesOptimas);
+	  
+	  System.out.print(response.toString());
 	}
 	
 }
