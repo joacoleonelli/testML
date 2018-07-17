@@ -1,6 +1,8 @@
 package com.jleonelli.sistemaSolar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -211,4 +213,57 @@ public class SistemaSolarService {
 	  System.out.print(response.toString());
 	}
 	
+	public void calcularCondicionesClimaticasPorDia(Integer años, Planeta planeta1, Planeta planeta2, Planeta planeta3) {
+	  PronosticoPorDia pronostico;
+	  
+	  int dias = años * 365;
+	  Map<String, Integer> posicionPlaneta1;
+    Map<String, Integer> posicionPlaneta2;
+    Map<String, Integer> posicionPlaneta3;
+    
+    boolean planetasAlineados = false;
+    boolean solDentroTriangulo = false;
+    Float perimetroMaximo = (float) 0;
+    Integer diaDePicoMaximoDeLluvia = null;
+    
+    Map<String, Integer> sol = new HashMap<String, Integer>();
+    sol.put("x", 0);
+    sol.put("y", 0);
+	  for (Integer d = 0; d <= dias; d++) {
+	    pronostico = new PronosticoPorDia();
+	    pronostico.setDia(d.toString());
+	    
+      posicionPlaneta1 = calcularPosicionPlaneta(planeta1, d);
+      posicionPlaneta2 = calcularPosicionPlaneta(planeta2, d);
+      posicionPlaneta3 = calcularPosicionPlaneta(planeta3, d);
+
+      planetasAlineados = calcularAlineacion(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3);
+      
+      if (planetasAlineados) {
+        boolean planeta12AlineadoSol = calcularAlineacion(posicionPlaneta1, posicionPlaneta2, sol);
+        boolean planeta23AlineadoSol = calcularAlineacion(posicionPlaneta2, posicionPlaneta3, sol);
+        
+        if (planeta12AlineadoSol && planeta23AlineadoSol) {
+          pronostico.setClima("Sequia.");
+        } else {
+          pronostico.setClima("Condiciones optimas de presión y temperatura.");
+        }
+        
+      } else {
+        solDentroTriangulo = calcularSolDentroTriangulo(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3, sol);
+        if (solDentroTriangulo) {
+          pronostico.setClima("Lluvia.");
+          Float perimetroActual = calcularPerimetroTriangulo(posicionPlaneta1, posicionPlaneta2, posicionPlaneta3);
+          if (perimetroActual > perimetroMaximo) {
+            perimetroMaximo = perimetroActual;
+            diaDePicoMaximoDeLluvia = d;
+          }
+        }
+      }
+      
+      // insert pronostico
+    }
+	  
+	  // update pronostico con pico de lluvia
+	}
 }
